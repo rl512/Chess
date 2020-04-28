@@ -318,7 +318,10 @@ public class Chess {
 		String newcolor; // color of new chesspiece  
 		boolean pawcheck=false; //check illegal move of pawn if needed  
 		boolean rookcheck=false; //check illegal move of rook if needed  
-		boolean bishopcheck=false; //check illegal bishop if needed 
+		boolean bishopcheck=false; //check illegal bishop if needed  
+		boolean queencheck=false; // check illegal move of queen 
+		boolean kingcheck=false; // check illegal move of king 
+		boolean knightcheck=false; // check illegal move of knight 
 		
 		if (Character.isUpperCase(oldposcol)) { //Checks to see if the oldpositioncolumn is uppercase 
 			
@@ -524,6 +527,9 @@ public class Chess {
 				
 				if (pawcheck) {  // if a white player make an illegal pawn move 
 					return true; 
+				} 
+				else { 
+					return false; 
 				}
 			} 
 			
@@ -533,6 +539,9 @@ public class Chess {
 				
 				if (pawcheck) {  // if a black player made an illegal pawn move 
 					return true; 
+				} 
+				else { 
+					return false;
 				}
 			}
 		} 
@@ -543,6 +552,9 @@ public class Chess {
 			
 			if (rookcheck) { 
 				return true; 
+			} 
+			else { 
+				return false;
 			}
 		}  
 		
@@ -552,10 +564,47 @@ public class Chess {
 			
 			if (bishopcheck) { 
 				return true; 
+			} 
+			else { 
+				return false;
 			}
 		}  
 		
+		if (oldpiece.getType().equalsIgnoreCase("Q")) { // check the illegal move of Queen  {
+			
+			queencheck=illegalqueen(oldposrow, oldposindexcol, newposrow, newposindexcol, count); 
+			
+			if (queencheck) { 
+				return true; 
+			} 
+			else { 
+				return false;
+			}
+		}  
 		
+		if (oldpiece.getType().equalsIgnoreCase("K")) { // check the illegal move of King  {
+			
+			kingcheck=illegalbishop(oldposrow, oldposindexcol, newposrow, newposindexcol, count); 
+			
+			if (kingcheck) { 
+				return true; 
+			} 
+			else { 
+				return false;
+			}
+		} 
+		
+		if (oldpiece.getType().equalsIgnoreCase("k")) { // check the illegal move of bishop  {
+			
+			knightcheck=illegalbishop(oldposrow, oldposindexcol, newposrow, newposindexcol, count); 
+			
+			if (knightcheck) { 
+				return true; 
+			} 
+			else { 
+				return false; 
+			}
+		} 
 		return false;
 	} 
 	
@@ -950,7 +999,2148 @@ public class Chess {
 			return true; 
 		}
 	} 
+	
+	
+	public static boolean illegalking (int oldposrow, int oldposindexcol, int newposrow, int newposindexcol, int count) { 
+		
+		int differencerows=newposrow-oldposrow; // calculate the difference in rows  
+		int differencecols=newposindexcol-oldposindexcol; // calculate the difference in columns  
+		/* 
+		 * calculate the difference in rows without negative 
+		 */
+		differencerows=Math.abs(differencerows); 
+		differencecols=Math.abs(differencecols); 
+		
+		if (oldposrow==newposrow) { // king is moving horizontally 
+			
+			if (differencecols==1) { // king is moving one space 
+				return false; 
+				
+			}  
+			else { // king moving more than one space-illegal 
+				return true; 
+			}
+		} 
+		
+		else if (oldposindexcol==newposindexcol) { // king is moving up and down 
+			
+			if (differencerows==1) { // king is moving one space 
+				return false; 
+			} 
+			else { // king moving more than one space-illegal 
+				return true; 
+			}
+		} 
+		
+		else if (differencerows==differencecols) {  // check if king moves diagonal 
+			
+			if (differencerows==1) { // king moves diagonally one space 
+				return false; 
+			} 
+			else { 
+				return true; 
+			}
+		} 
+		else { // all other moves illegal 
+			return true; 
+		}
+	} 
+	
+	public static boolean illegalknight (int oldposrow, int oldposindexcol, int newposrow, int newposindexcol, int count) { 
+		
+		int differencerows=newposrow-oldposrow; // calculate the difference in rows  
+		int differencecols=newposindexcol-oldposindexcol; // calculate the difference in columns  
+		/* 
+		 * calculate the difference in rows without negative 
+		 */
+		differencerows=Math.abs(differencerows); 
+		differencecols=Math.abs(differencecols); 
+		
+		if (oldposrow==newposrow) { // knight moves along a row -illegal 
+			return true; 
+		} 
+		else if (oldposindexcol==newposindexcol) { // knight moves up and down-illegal 
+			return true; 
+		}  
+		else if (differencerows==differencecols) { // knight moves diagonally-illegal  
+			return true; 
+		} 
+		
+		else { 
+			
+			if (differencerows>2) { // knight made an illegal move 
+				return true; 
+			} 
+			else if (differencecols>2) { 
+				return true; 
+			}  
+			else { 
+				return false;
+			}
+		}
+	} 
+	
+	/* 
+	 * method used to check if a particular King is in check 
+	 * After white turn-check black's king to ensure its not in check 
+	 * After black turn-check white's king to ensure its not in check 
+	 */
+	public static boolean check (boolean white, boolean black, boolean checkcheckmate, int kingrow, int kingcol) { 
+		
+		boolean checkrookorqueen=false;  
+		boolean checkpawn=false;  
+		boolean checkbishop=false;    
+		
+		//check horizontal to see if there is a rook or queen   
+		checkrookorqueen=horizontalverticalcheck(white,black,kingrow,kingcol);  
+		//check pawn to see if it causes its opponent king to be in check  
+		checkpawn=pawncheck(white,black,kingrow,kingcol); 
+		//check bishop to see if it causes its opponent king to be in check 
+		checkbishop=bishopcheck(white,black,kingrow,kingcol);  
+		//check
+		
+		if (checkrookorqueen) { // if the rook  
+			return true; 
+		}  
+		else if (checkpawn) { // if a king is in check by pawn 
+			return true; 
+		} 
+		else if (checkbishop) { // if a king is in check by bishop 
+			return true; 
+		} 
+		else if (checkrookorqueen) { //
+			
+		}
+		
+		
+	}  
+	
+	/* 
+	 * check for horizontal rows and vertical columns of king to see if there is a 
+	 */
+	
+	public static boolean horizontalverticalcheck(boolean white, boolean black, int kingrow, int kingcol) { 
+		
+		if (white) { // white just made a move, got info on black king, need to see if there are white pieces   
+			
+			for (int e=kingcol+1; e<8; e++) { // check vertically to the right of king 
+				
+				if (chessboard[kingrow][e].getPiece()!=null) { // there is a chesspiece 
+					
+					if (chessboard[kingrow][e].getPiece().getColor().equalsIgnoreCase("W")) { // the piece is white 
+						
+						if (chessboard[kingrow][e].getPiece().getType().equalsIgnoreCase("Q")) {  // the piece is queen 
+							return true; 
+						} 
+						
+						else if (chessboard[kingrow][e].getPiece().getType().equalsIgnoreCase("R")) { // the piece is rook 
+							return true; 
+						}  
+						else { 
+							break;
+						}
+					
+					}
+				}
+			} 
+			
+			for (int f=kingcol-1; f>=0; f--) { // check vertically to the left of king 
+				
+				if (chessboard[kingrow][f].getPiece()!=null) { // there is a chesspiece 
+					
+					if (chessboard[kingrow][f].getPiece().getColor().equalsIgnoreCase("W")) { // the piece is white 
+						
+						if (chessboard[kingrow][f].getPiece().getType().equalsIgnoreCase("Q")) {  // the piece is queen 
+							return true; 
+						} 
+						
+						else if (chessboard[kingrow][f].getPiece().getType().equalsIgnoreCase("R")) { // the piece is rook 
+							return true; 
+						}  
+						else { 
+							break; 
+						}
+					
+					}
+				}
+			} 
+			
+			//check horizontally 
+			
+			for (int g=kingrow+1; g<8; g++) { // check for pond or queen below the king 
+				
+				if (chessboard[g][kingcol].getPiece()!=null) { // there is a chesspiece 
+					
+					if (chessboard[g][kingcol].getPiece().getColor().equalsIgnoreCase("W")) { // the piece is white
+						
+						if (chessboard[g][kingcol].getPiece().getType().equalsIgnoreCase("Q")) {  // the piece is queen 
+							return true; 
+						} 
+						
+						else if (chessboard[g][kingcol].getPiece().getType().equalsIgnoreCase("R")) { // the piece is rook 
+							return true; 
+						}  
+						else { 
+							break; 
+						}
+					
+					}
+				}
+			} 
+			
+			for (int k=kingrow-1; k>=0; k--) { // check pond or queen above the king 
+				
+				if (chessboard[k][kingcol].getPiece()!=null) { // there is a chesspiece 
+					
+					if (chessboard[k][kingcol].getPiece().getColor().equalsIgnoreCase("W")) { // the piece is white 
+						
+						if (chessboard[k][kingcol].getPiece().getType().equalsIgnoreCase("Q")) {  // the piece is queen 
+							return true; 
+						} 
+						
+						else if (chessboard[k][kingcol].getPiece().getType().equalsIgnoreCase("R")) { // the piece is rook 
+							return true; 
+						}  
+						else { 
+							break; 
+						}
+					
+					}
+				}
+			} 
+			return false; 
+		} 
+		
+		else { // black just moved, got white king's information, and now need to check for black ponds and queens 
+			
+			for (int l=kingcol+1; l<8; l++) { // check vertically to the right of king 
+				
+				if (chessboard[kingrow][l].getPiece()!=null) { // there is a chesspiece 
+					
+					if (chessboard[kingrow][l].getPiece().getColor().equalsIgnoreCase("B")) { // the piece is black
+						
+						if (chessboard[kingrow][l].getPiece().getType().equalsIgnoreCase("Q")) {  // the piece is queen 
+							return true; 
+						} 
+						
+						else if (chessboard[kingrow][l].getPiece().getType().equalsIgnoreCase("R")) { // the piece is rook 
+							return true; 
+						} 
+						else { 
+							break;
+						}
+					
+					}
+				}
+			} 
+			
+			for (int m=kingcol-1; m>=0; m--) { // check vertically to the left of king 
+				
+				if (chessboard[kingrow][m].getPiece()!=null) { // there is a chesspiece 
+					
+					if (chessboard[kingrow][m].getPiece().getColor().equalsIgnoreCase("B")) { // the piece is black 
+						
+						if (chessboard[kingrow][m].getPiece().getType().equalsIgnoreCase("Q")) {  // the piece is queen 
+							return true; 
+						} 
+						
+						else if (chessboard[kingrow][m].getPiece().getType().equalsIgnoreCase("R")) { // the piece is rook 
+							return true; 
+						}  
+						else { 
+							break; 
+						}
+					
+					}
+				}
+			} 
+			
+			//check horizontally 
+			
+			for (int n=kingrow+1; n<8; n++) { // check for pond or queen below the king 
+				
+				if (chessboard[n][kingcol].getPiece()!=null) { // there is a chesspiece 
+					
+					if (chessboard[n][kingcol].getPiece().getColor().equalsIgnoreCase("B")) { // the piece is black 
+						
+						if (chessboard[n][kingcol].getPiece().getType().equalsIgnoreCase("Q")) {  // the piece is queen 
+							return true; 
+						} 
+						
+						else if (chessboard[n][kingcol].getPiece().getType().equalsIgnoreCase("R")) { // the piece is rook 
+							return true; 
+						}  
+						else { 
+							break; 
+						}
+					
+					}
+				}
+			} 
+			
+			for (int o=kingrow-1; o>=0; o--) { // check pond or queen above the king 
+				
+				if (chessboard[o][kingcol].getPiece()!=null) { // there is a chesspiece 
+					
+					if (chessboard[o][kingcol].getPiece().getColor().equalsIgnoreCase("B")) { // the piece is black 
+						
+						if (chessboard[o][kingcol].getPiece().getType().equalsIgnoreCase("Q")) {  // the piece is queen 
+							return true; 
+						} 
+						
+						else if (chessboard[o][kingcol].getPiece().getType().equalsIgnoreCase("R")) { // the piece is rook 
+							return true; 
+						}  
+						else { 
+							break; 
+						}
+					
+					}
+				}
+			} 
+			return false;
+		} 
+	} 
+	/* 
+	 * check for pawn-to see if a king is in check by pawn  
+	 */
+	public static boolean pawncheck (boolean white, boolean black, int kingrow, int kingcol) { 
+		
+		int checkrows=0; 
+		int checkcols=0; // check cols for left diagonal
+		int checkcols2=0; // check cols for right diagonal
+		
+		if (white) { // white player moved, got king info, need to check to if check will caused by white pawns 
+			
+			if (kingrow<7) {
+			
+				if (kingcol>0 && kingcol<7) {  
+					checkrows=kingrow+1;  
+					checkcols=kingcol-1;
+				
+					if (chessboard[checkrows][checkcols].getPiece()!=null) { // there is a piece 
+						
+						if (chessboard[checkrows][checkcols].getPiece().getColor().equalsIgnoreCase("W")) { // chesspiece is white
+							
+							if (chessboard[checkrows][checkcols].getPiece().getType().equalsIgnoreCase("P")) { // piece is pawn
+								return true; 
+							} 
+							else { // piece is not a pawn. Check other diagonal   
+								checkcols2=kingcol+1;  
+								
+								if (chessboard[checkrows][checkcols2].getPiece()!=null) { // there is a piece 
+									
+									if (chessboard[checkrows][checkcols2].getPiece().getColor().equalsIgnoreCase("W")) { //chesspiece is white 
+										
+										if (chessboard[checkrows][checkcols2].getPiece().getType().equalsIgnoreCase("P")) { // piece is a pawn 
+											return true; 
+										} 
+										else { // some other white chesspiece, return false  
+											return false; 
+										}
+									} 
+									else { // color is black 
+										return false; 
+									}
+								} 
+								else { // there is no piece 
+									return false; 
+								}
+							}
+						} 
+						
+						else { // there is a black piece, check other diagonal  
+							checkcols2=kingcol+1; 
+							
+							if (chessboard[checkrows][checkcols2].getPiece()!=null) { // there is a piece 
+								
+								if (chessboard[checkrows][checkcols2].getPiece().getColor().equalsIgnoreCase("W")) { // chesspiece is white 
+									
+									if(chessboard[checkrows][checkcols2].getPiece().getType().equalsIgnoreCase("P")) { // piece is a pawn 
+										return true; 
+									} 
+									else { // other white chesspiece 
+										return false; 
+									}
+								} 
+								else { // black piece  
+									return false; 
+								}
+							} 
+							else { // other diagonal has no piece 
+								return false; 
+							}
+						}
+				
+					} 
+					else { // no piece in spot, check other diagonal  
+						checkcols2=kingcol+1; 
+						
+						if (chessboard[checkrows][checkcols2].getPiece()!=null) { // there is a piece 
+							
+							if (chessboard[checkrows][checkcols2].getPiece().getColor().equalsIgnoreCase("W")) {// piece is white  
+								
+								if (chessboard[checkrows][checkcols2].getPiece().getType().equalsIgnoreCase("P")) { // piece is pawn 
+									return true;
+								} 
+								else { // there are some other white pieces 
+									return false; 
+								}
+							} 
+							else {// chesspiece is black  
+								return false; 
+							}
+						} 
+						else { // there is no piece on other diagonal 
+							return false; 
+						}
+					} 
+				} 
+				else if (kingcol==0) { // king is located on the leftmost column  
+					checkrows=kingrow+1; 
+					checkcols=kingcol+1;  
+					
+					if (chessboard[checkrows][checkcols].getPiece()!=null) { // there is a piece 
+						
+						if (chessboard[checkrows][checkcols].getPiece().getColor().contentEquals("W")) { // there is a white piece 
+							
+							if (chessboard[checkrows][checkcols].getPiece().getType().equalsIgnoreCase("P")) { // the piece is a pawn 
+								return true; 
+							} 
+							else { // there is some other white piece
+								return false; 
+							}
+						} 
+						else { // the piece is black
+							return false; 
+						}
+					} 
+					else { // there is not piece present 
+						return false; 
+					}
+				} 
+				else { // king is located on the rightmost column  
+					checkrows=kingrow+1; 
+					checkcols=kingcol-1; 
+					
+					if (chessboard[checkrows][checkcols].getPiece()!=null) { 
+						
+						if (chessboard[checkrows][checkcols].getPiece().getColor().equalsIgnoreCase("W")) { 
+							
+							if (chessboard[checkrows][checkcols].getPiece().getType().equalsIgnoreCase("P")) { 
+								return true; 
+							} 
+							else { // some other white piece-return false 
+								return false; 
+							}
+						} 
+						else { // piece is black  
+							return false; 
+						}
+					} 
+					else { // there is no piece 
+						return false; 
+					}
+				}
+				
+			} 
+			else { // black king is located at the last row-impossible for it to be check 
+				return false; 
+			} 
+		} 
+		
+		else { // black player finish turn, got white king information, check black pawns to see if white king is in check  
+			
+			if (kingrow>1) { // 
+				
+				if (kingcol>0 && kingcol<7) { 
+					checkrows=kingrow-1; 
+					checkcols=kingcol-1;  
+					
+					if (chessboard[checkrows][checkcols].getPiece()!=null) { // there is a piece 
+						
+						if (chessboard[checkrows][checkcols].getPiece().getColor().equalsIgnoreCase("B")) { // the piece is black 
+							
+							if (chessboard[checkrows][checkcols].getPiece().getType().equalsIgnoreCase("P")) { // the piece is a pawn 
+								return true; 
+							} 
+							else {  // there is some other black piece, check other diagonal 
+								checkcols2=kingcol+1;  
+								
+								if (chessboard[checkrows][checkcols2].getPiece()!=null) { 
+									
+									if (chessboard[checkrows][checkcols2].getPiece().getColor().equalsIgnoreCase("B")) { // the piece is black 
+										
+										if (chessboard[checkrows][checkcols2].getPiece().getType().equalsIgnoreCase("P")) { // the piece is pawn 
+											return true; 
+										} 
+										else { // some other black piece 
+											return false; 
+										}
+									} 
+									else { // its a white piece  
+										return false; 
+									}
+								} 
+								else { // there is no piece existing 
+									return false; 
+								}
+								
+							}
+						} 
+						else {// there is a white piece, check other diagonal  
+							checkcols2=kingcol+1;  
+							
+							if (chessboard[checkrows][checkcols2].getPiece()!=null) { // there is a piece 
+								
+								if (chessboard[checkrows][checkcols2].getPiece().getColor().equalsIgnoreCase("B")) { // it is a black piece 
+									
+									if (chessboard[checkrows][checkcols2].getPiece().getType().equalsIgnoreCase("P")) { // it is a pawn 
+										return true;
+									} 
+									else {  // some other black piece 
+										return false; 
+									}
+								} 
+								else { // it is a white piece, return false  
+									return false; 
+								}
+								
+							} 
+							else { // there is no piece existing 
+								return false; 
+							}
+							
+						}
+					} 
+					else {  // there is no piece, check other diagonal
+						checkcols2=kingcol+1;  
+						
+						if (chessboard[checkrows][checkcols2].getPiece()!=null) { 
+							
+							if (chessboard[checkrows][checkcols2].getPiece().getColor().equalsIgnoreCase("B")) { 
+								
+								if (chessboard[checkrows][checkcols2].getPiece().getType().equalsIgnoreCase("P")) { 
+									return true;
+								} 
+								else { // it is another type of black piece 
+									return false; 
+								}
+							}
+						} 
+						else { // it is an empty space, return false 
+							return false; 
+						}
+						
+					}
+					
+				} 
+				
+				else if (kingcol==0) {  // king is located on the leftmost col
+					checkrows=kingrow-1; 
+					checkcols=1;  
+					
+					if (chessboard[checkrows][checkcols2].getPiece()!=null) { 
+						
+						if (chessboard[checkrows][checkcols2].getPiece().getColor().equalsIgnoreCase("B")) { 
+							
+							if (chessboard[checkrows][checkcols2].getPiece().getType().equalsIgnoreCase("P")) { 
+								return true;
+							} 
+							else { // it is another type of black piece 
+								return false; 
+							}
+						} 
+						else {// the piece is a white piece  
+							return false; 
+						}
+					} 
+					else { // there is no piece 
+						return false; 
+					}
+					
+				} 
+				
+				else {  // king is located on the rightmost cols 
+					checkrows=kingrow-1; 
+					checkcols=6;  
+					
+					if (chessboard[checkrows][checkcols].getPiece()!=null) { 
+						
+						if (chessboard[checkrows][checkcols].getPiece().getColor().equalsIgnoreCase("B")) { 
+							
+							if (chessboard[checkrows][checkcols].getPiece().getType().equalsIgnoreCase("P")) { 
+								return true; 
+							} 
+							else { 
+								return false; 
+							}
+						} 
+						else { 
+							return false; 
+						}
+					} 
+					else { // there is no piece 
+						return false; 
+					}
+					
+				}
+				
+			} 
+		
+			else { // white king is located at the top 2 rows of grid, impossible to have black ponds behind  
+				return false; 
+			}
+		} 
+		return false;
+	} 
+	/* 
+	 * bishop and queen check 
+	 * 
+	 */
+	public static boolean bishopcheck (boolean white, boolean black, int kingrow, int kingcol) { 
+		  
+		int checkrow=kingrow-1; 
+		int checkcol=kingcol-1; 
+		
+		if (white) {  // white player made a move, got black king's location 
+			//check diagonal going left and up  
+			
+			while (checkcol>=0 && checkrow>=0) { 
+				
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						
+						if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("B")) { // there is a white bishop 
+							return true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("Q")) { // there is a white queen 
+							return true; 
+						} 
+						else { // some other white piece  
+							break; 
+						}
+					} 
+					else {  // same color piece as king 
+						break; 
+					}
+				} 
+				checkrow--; 
+				checkcol--; 
+			} 
+			// check diagonal going right and up 
+			checkrow=kingrow-1; 
+			checkcol=kingcol+1;  
+			
+			while (checkrow>=0 && checkcol<=7) { 
+				
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						
+						if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("B")) { // there is a white bishop 
+							return true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("Q")) { // there is a white queen 
+							return true; 
+						} 
+						else { // some other white piece  
+							break; 
+						}
+					} 
+					else {  // same color piece as king 
+						break; 
+					}
+				} 
+				checkrow--; 
+				checkcol++; 
+			} 
+			
+			// check diagonal going left and down 
+			checkrow=kingrow+1; 
+			checkcol=kingcol-1;  
+			
+			while (checkrow<=7 && checkcol>=0) { 
+				
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						
+						if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("B")) { // there is a white bishop 
+							return true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("Q")) { // there is a white queen 
+							return true; 
+						} 
+						else { // some other white piece  
+							break; 
+						}
+					} 
+					else {  // same color piece as king 
+						break; 
+					}
+				} 
+				checkrow++; 
+				checkcol--; 
+			} 
+			
+			// check diagonal going right and down 
+			checkrow=kingrow+1; 
+			checkcol=kingcol+1; 
+			
+			while (checkrow<=7 && checkcol<=7) { 
+				
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						
+						if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("B")) { // there is a white bishop 
+							return true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("Q")) { // there is a white queen 
+							return true; 
+						} 
+						else { // some other white piece  
+							break; 
+						}
+					} 
+					else {  // same color piece as king 
+						break; 
+					}
+				} 
+				checkrow++; 
+				checkcol++; 
+			}
+		} 
+		
+		else { // black player moved black piece, got white queen's information, 
+			
+			//check diagonal going left and up  
+			checkrow=kingrow-1; 
+			checkcol=kingcol-1; 
+			
+			while (checkcol>=0 && checkrow>=0) { 
+				
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("B")) { 
+						
+						if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("B")) { // there is a black bishop 
+							return true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("Q")) { // there is a black queen 
+							return true; 
+						} 
+						else { // some other white piece  
+							break; 
+						}
+					} 
+					else {  // same color piece as king 
+						break; 
+					}
+				} 
+				checkrow--; 
+				checkcol--; 
+			} 
+			// check diagonal going right and up 
+			checkrow=kingrow-1; 
+			checkcol=kingcol+1;  
+			
+			while (checkrow>=0 && checkcol<=7) { 
+				
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("B")) { 
+						
+						if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("B")) { // there is a black bishop 
+							return true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("Q")) { // there is a black queen 
+							return true; 
+						} 
+						else { // some other white piece  
+							break; 
+						}
+					} 
+					else {  // same color piece as king 
+						break; 
+					}
+				} 
+				checkrow--; 
+				checkcol++; 
+			} 
+			
+			// check diagonal going left and down 
+			checkrow=kingrow+1; 
+			checkcol=kingcol-1;  
+			
+			while (checkrow<=7 && checkcol>=0) { 
+				
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("B")) { 
+						
+						if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("B")) { // there is a black bishop 
+							return true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("Q")) { // there is a black queen 
+							return true; 
+						} 
+						else { // some other black piece  
+							break; 
+						}
+					} 
+					else {  // same color piece as king 
+						break; 
+					}
+				} 
+				checkrow++; 
+				checkcol--; 
+			} 
+			
+			// check diagonal going right and down 
+			checkrow=kingrow+1; 
+			checkcol=kingcol+1; 
+			
+			while (checkrow<=7 && checkcol<=7) { 
+				
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("B")) { 
+						
+						if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("B")) { // there is a black bishop 
+							return true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getType().equalsIgnoreCase("Q")) { // there is a black queen 
+							return true; 
+						} 
+						else { // some other black piece  
+							break; 
+						}
+					} 
+					else {  // same color piece as king 
+						break; 
+					}
+				} 
+				checkrow++; 
+				checkcol++; 
+			}
+		} 
+		
+		return false; 
+	} 
+	/* 
+	 * check the knight after each move 
+	 * 
+	 */
+	public static boolean knightcheck (boolean white, boolean black, int kingrow, int kingcol) { 
+		int knightrow=0; // row for the potential knight  
+		int knightcol=0; // column for the potential knight    
+		int diffrow=0; // difference between found row of knight  
+		int diffcol=0; //difference between found col of knight  
+		
+		if (white) { // white player has moved, got black kings information, check to see if that king is in check  
+			
+			for (int a=0; a<7; a++) { 
+				
+				for (int b=0; b<7; b++) { 
+					
+					if (chessboard[a][b].getPiece()!=null) { 
+						
+						if (chessboard[a][b].getPiece().getType().equalsIgnoreCase("W")) { 
+							
+							if (chessboard[a][b].getPiece().getType().equalsIgnoreCase("k")) { 
+								knightrow=a; 
+								knightcol=b;  
+								diffrow=kingrow-knightrow; 
+								diffcol=kingcol-knightcol;  
+								diffrow=Math.abs(diffrow); 
+								diffcol=Math.abs(diffcol);  
+								
+								if (diffcol<=2) { 
+									
+									if (diffcol!=0) { // knight is not on the same column as king 
+										
+										if (diffcol==1 && diffrow==2) { 
+											return true; 
+										} 
+										if (diffcol==2 && diffrow==1) { 
+											return true; 
+										}
+									}
+								}
+							}
+						} 
+					}
+				}
+			} 
+			return false; 
+		} 
+		
+		else { // if black player has moved 
+			
+			for (int a=0; a<7; a++) { 
+				
+				for (int b=0; b<7; b++) { 
+					
+					if (chessboard[a][b].getPiece()!=null) { 
+						
+						if (chessboard[a][b].getPiece().getType().equalsIgnoreCase("B")) { 
+							
+							if (chessboard[a][b].getPiece().getType().equalsIgnoreCase("k")) { 
+								knightrow=a; 
+								knightcol=b;  
+								diffrow=kingrow-knightrow; 
+								diffcol=kingcol-knightcol;  
+								diffrow=Math.abs(diffrow); 
+								diffcol=Math.abs(diffcol);  
+								
+								if (diffcol<=2) { 
+									
+									if (diffcol!=0) { // knight is not on the same column as king 
+										
+										if (diffcol==1 && diffrow==2) { 
+											return true; 
+										} 
+										if (diffcol==2 && diffrow==1) { 
+											return true; 
+										}
+									}
+								}
+							}
+						} 
+					}
+				}
+			} 
+			return false; 
+		}
+		
+	} 
+	
+	public static boolean checkmate(boolean white, boolean black) {  
+		int kingrow=0; 
+		int kingcol=0;  
+		int checkrow=0; 
+		int checkcol=0; 
+		boolean checkcheckmate=false;  
+		boolean thereisapiece1=false;  
+		boolean thereisapiece2=false; 
+		boolean thereisapiece3=false; 
+		boolean thereisapiece4=false; 
+		boolean thereisapiece5=false;  
+		boolean thereisapiece6=false; 
+		boolean thereisapiece7=false; 
+		boolean thereisapiece8=false; 
+		boolean checkpiece1=false; 
+		boolean checkpiece2=false; 
+		boolean checkpiece3=false;  
+		boolean checkpiece4=false; 
+		boolean checkpiece5=false;  
+		boolean checkpiece6=false; 
+		boolean checkpiece7=false; 
+		boolean checkpiece8=false;  
+		boolean notchecknopiece=false; 
+		
+		if (white) { // white player's turn, get black king's locator 
+			for (int a=0; a<7; a++) { 
+				for (int b=0; b<7; b++) { 
+					if (chessboard[a][b].getPiece()!=null) { 
+						if (chessboard[a][b].getPiece().getColor().equalsIgnoreCase("B")) { 
+							if (chessboard[a][b].getPiece().getType().equalsIgnoreCase("K")) { 
+								kingrow=a; 
+								kingcol=b;  
+								break; 
+							}
+						}
+					}
+				}
+			}
+		} 
+		else { // black player turn, get white king locator 
+			for (int a=0; a<7; a++) { 
+				for (int b=0; b<7; b++) { 
+					if (chessboard[a][b].getPiece()!=null) { 
+						if (chessboard[a][b].getPiece().getColor().equalsIgnoreCase("W")) { 
+							if (chessboard[a][b].getPiece().getType().equalsIgnoreCase("K")) { 
+								kingrow=a; 
+								kingcol=b;  
+								break; 
+							}
+						}
+					}
+				}
+			}
+		}
+		
+	if (kingrow==7) { // king is located on the last row 
+			//check left adjust for check:  
+			
+		if (kingcol>0 && kingcol<7) { // king is located on the last row, but not on the edges 
+				checkrow=kingrow; 
+				checkcol=kingcol-1; // king is located to the left adjacent to the original king  
+					if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+							if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+								thereisapiece1=true;  
+								checkpiece1=true; 
+							} 
+							else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+								thereisapiece1=true;  
+								checkpiece1=true; 
+							} 
+							else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+								thereisapiece1=true; 
+							}
+						}
+					 else { // same color piece as king. 
+						thereisapiece1=true; 
+					}
+				} 
+				if (thereisapiece1==false) { // if that space does not have a piece, move the king there to see if its in check. 
+					if (check(white, black,checkcheckmate,checkrow,checkcol)) { 
+						checkpiece1=true; 
+					} 
+					else { // empty space that is not in check 
+						notchecknopiece=true; 
+					}
+				}  
+				checkrow=kingrow; 
+				checkcol=kingcol+1;  // king is located on the right adjacent to the original king   
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+							if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+								thereisapiece2=true;  
+								checkpiece2=true; 
+							} 
+							else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+								thereisapiece2=true;  
+								checkpiece2=true; 
+							} 
+							else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+								thereisapiece2=true; 
+							}
+						}
+					 else { // same color piece as king. 
+						thereisapiece2=true; 
+					}
+				} 
+				if (thereisapiece2==false) { 
+					if (check(white, black,checkcheckmate,checkrow,checkcol)) { 
+						checkpiece2=true; 
+					} 
+					else { // empty space that is not in check 
+						notchecknopiece=true; 
+					}
+				} 
+			checkrow=kingrow-1; 
+			checkcol=kingcol; // king is located right in front of original king  
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+							thereisapiece3=true;  
+							checkpiece3=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece3=true;  
+							checkpiece3=true; 
+						} 
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece3=true; 
+						}
+					}
+					else { // same color piece as king. 
+						thereisapiece3=true; 
+					}
+				} 
+				if (thereisapiece3==false) { 
+					if (check(white, black,checkcheckmate,checkrow,checkcol)) { 
+						checkpiece3=true; 
+					} 
+					else { // empty space not in check 
+						notchecknopiece=true; 
+					}
+				}  
+			checkrow=kingrow-1; // king is located to the left diagonal of original king  
+			checkcol=kingcol-1;  
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("k")) { 
+							thereisapiece4=true;  
+							checkpiece4=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece4=true;  
+							checkpiece4=true; 
+						} 
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece4=true; 
+						}
+					}
+				else { // same color piece as king. 
+					thereisapiece4=true; 
+				}
+			}   
+			if (thereisapiece4==false) { 
+				if (check(white, black,checkcheckmate,checkrow,checkcol)) { 
+					checkpiece4=true; 
+				}  
+				else { // empty space not in check 
+					notchecknopiece=true; 
+				}
+			} // here 
+			checkrow=kingrow-1; 
+			checkcol=kingcol+1; // king is located to the right diagonal of original king  
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("k")) { 
+							thereisapiece5=true;  
+							checkpiece5=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece5=true;  
+							checkpiece5=true; 
+						} 
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece5=true; 
+						}
+					}
+				 
+				else { // same color piece as king. 
+					thereisapiece5=true; 
+				}
+			} 
+				if (thereisapiece5==false) {
+					if (check(white, black,checkcheckmate,checkrow,checkcol)) { 
+						checkpiece5=true; 
+					} 
+					else { // empty space but not in check 
+						notchecknopiece=true; 
+					} 
+				}
+				
+			if (checkpiece1 && checkpiece2 && checkpiece3 && checkpiece4 && checkpiece5) { // all other sports for king to escape check are indeed check. 
+				return true; 
+			} 
+			else if (notchecknopiece) {  // there is a at least a space open and that space is in check 
+				return false; 
+			} 
+			else { // there is a combination of pieces, pieces that are a threat to check, and empty space in check 
+				return true;  
+			} 
+		} 
+		
+		else if (kingcol==0) { // king is located on the leftmost side
+			
+			checkrow=kingrow; // king is located right next to original king 
+			checkcol=kingcol+1;   
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						} 
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece1=true; 
+						}
+					}
+				 else { // same color piece as king. 
+					thereisapiece1=true; 
+				}
+			} 
+			if (thereisapiece1==false) { 
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the adjacent side of king 
+					checkpiece1=true; 
+				} 
+				else { 
+					notchecknopiece=true; 
+				}
+			}
+			checkrow=kingrow-1; // king is right in front of original king  
+			checkcol=kingcol;  
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+							thereisapiece2=true;  
+							checkpiece2=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece2=true;  
+							checkpiece2=true; 
+						} 
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece2=true; 
+						}
+					}
+				else { // same color piece as king. 
+					thereisapiece2=true; 
+				}
+			} 
+			if (thereisapiece2==false) {
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located right in front of original king 
+					thereisapiece2=true; 
+				} 
+				else { 
+					notchecknopiece=true; 
+				}
+			} 
+		checkrow=kingrow-1; // king is located diagonally to original king 
+		checkcol=kingcol+1;  
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("k")) { 
+							thereisapiece3=true;  
+							checkpiece3=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece3=true;  
+							checkpiece3=true; 
+						} 
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece3=true; 
+						}
+					}
+				 
+				else { // same color piece as king. 
+					thereisapiece3=true; 
+				}
+			} 
+				if (thereisapiece3==false)  {
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is to the right diagonal of original king  
+						thereisapiece3=true; 
+					} 
+					else { 
+						notchecknopiece=true; 
+					}
+				}
+			}
+			
+		else { // king is located on the rightmost last row 
+				
+			checkrow=kingrow;  // king is to the left of original king 
+			checkcol=kingcol-1;  
+			if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						} 
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece1=true; 
+						}
+					}
+				 else { // same color piece as king. 
+					thereisapiece1=true; 
+				 }
+			} 
+			if (thereisapiece1==false) { 
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is to the left adjacent to the original king  
+					thereisapiece1=true; 
+				}  
+				else { 
+					notchecknopiece=true;  
+				}
+			}
+			checkrow=kingrow-1; 
+			checkcol=kingcol-1;  // king is located to the diagonal of original king  
+			if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+						thereisapiece2=true;  
+						checkpiece2=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+						thereisapiece2=true;  
+						checkpiece2=true; 
+					} 
+					else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+						thereisapiece2=true; 
+					}
+				}
+		 
+				else { // same color piece as king. 
+					thereisapiece2=true; 
+				}
+			}  
+			
+			if (thereisapiece2==false) { 
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is to the left adjacent to the original king  
+					thereisapiece2=true; 
+				} 
+				else { 
+					notchecknopiece=true;  
+				}
+			}
+		
+		checkrow=kingrow-1; 
+		checkcol=kingcol;  // king is located in front of original king  
+		if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+			if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+					thereisapiece3=true;  
+					checkpiece3=true; 
+				} 
+				else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+					thereisapiece3=true;  
+					checkpiece3=true; 
+				} 
+				else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+					thereisapiece3=true; 
+				}
+			}
+			else { // same color piece as king. 
+				thereisapiece3=true; 
+			}
+		} 
+			if (thereisapiece3==false) { 
+		
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is to the left adjacent to the original king  
+					thereisapiece3=true; 
+				} 
+				else { 
+					notchecknopiece=true;  
+				}
+			}
+		}  
+			
+	} 
+		
+	else if (kingrow>0 && kingrow<7) { // king is located from left and right edges 
+		
+		if (kingcol>0 && kingcol<7) { 
+				checkrow=kingrow; 
+				checkcol=kingcol-1;  // // king is located to the left adjacent of original king 
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						} 
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece1=true; 
+						}
+					}
+					else { // same color piece as king. 
+						thereisapiece1=true; 
+					}
+				} 
+				
+			if (thereisapiece1==false) { 
+				
+				if (!check(white,black,checkcheckmate,checkrow,checkcol)) {  
+					checkpiece1=true; 
+				} 
+				else { 
+					notchecknopiece=true; 
+				}
+			}	
+			checkcol=kingcol+1; // king is located to the right of original king 
+			if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+						thereisapiece2=true;  
+						checkpiece2=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+						thereisapiece2=true;  
+						checkpiece2=true; 
+					} 
+					else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+						thereisapiece2=true; 
+					}
+				}
+				else { // same color piece as king. 
+					thereisapiece2=true; 
+				}
+			} 
+			if (thereisapiece2==false) { 
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { 
+					checkpiece2=true; 
+				}  
+				else  { 
+					notchecknopiece=true;
+				}
+			}	
+			checkrow=kingrow-1; // king is located right in front of original king 
+			checkcol=kingcol;  
+			if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+						thereisapiece3=true;  
+						checkpiece3=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+						thereisapiece3=true;  
+						checkpiece3=true; 
+					} 
+					else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+						thereisapiece3=true; 
+					}
+				}
+				else { // same color piece as king. 
+					thereisapiece3=true; 
+				}
+			} 	
+			if (thereisapiece3==false) { 
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) {  
+					checkpiece3=true; 
+				} 
+				else { 
+					notchecknopiece=true;
+				}
+			}
+			checkrow=kingrow+1; // king is right below the original king 
+			if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+						thereisapiece4=true;  
+						checkpiece4=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+						thereisapiece4=true;  
+						checkpiece4=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+						thereisapiece4=true;  
+						checkpiece4=true;
+					}
+					else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+						thereisapiece4=true; 
+					}
+				}
+			else { // same color piece as king. 
+				thereisapiece4=true; 
+			}
+		} 	
+			if (thereisapiece4==false) { 
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the front of original king  
+					checkpiece4=true; 
+				} 
+				else { 
+					notchecknopiece=true; 
+				}
+			}
+			checkrow=kingrow-1; // king is located to the left diagonal of original king 
+			checkcol=kingcol-1;  
+			if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("k")) { 
+						thereisapiece5=true;  
+						checkpiece5=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+						thereisapiece5=true;  
+						checkpiece5=true; 
+					}  
+					else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+						thereisapiece5=true; 
+					}
+				}
+				else { // same color piece as king. 
+					thereisapiece5=true; 
+				}
+			} 	
+			if (thereisapiece5==false) { 
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the top left diagonal of original king  
+				checkpiece5=true; 
+				} 
+				else { 
+					notchecknopiece=true; 
+				}
+			}
+			checkrow=kingrow+1; //king is located to the bottom left diagonal of original king  
+			checkcol=kingcol-1; 		
+			if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("B")) { 
+						thereisapiece6=true;  
+						checkpiece6=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+						thereisapiece6=true;  
+						checkpiece6=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+						thereisapiece6=true;  
+						checkpiece6=true;
+					}
+					else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+						thereisapiece6=true; 
+					}
+				}
+				else { // same color piece as king. 
+					thereisapiece6=true; 
+				}
+			} 	
+			if (thereisapiece6==false) { 
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom left diagonal of original king  
+					thereisapiece6=true; 
+				}  
+				else { 
+					notchecknopiece=true; 
+				}
+			}
+			checkrow=kingrow-1; 
+			checkcol=kingcol+1;  // king is located to the top right diagonal of original king 
+			if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("B")) { 
+						thereisapiece7=true;  
+						checkpiece7=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+						thereisapiece7=true;  
+						checkpiece7=true; 
+					} 
+					else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+						thereisapiece7=true; 
+					}
+				}
+				else { // same color piece as king. 
+					thereisapiece7=true; 
+				}
+			} 		
+			if (thereisapiece7==true) {
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) {   
+					checkpiece7=true; 
+				}  
+				else { 
+					notchecknopiece=true; 
+				}
+			}
+			checkrow=kingrow+1; 
+			checkcol=kingcol+1;   
+			if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("B")) { 
+						thereisapiece8=true;  
+						checkpiece8=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+						thereisapiece8=true;  
+						checkpiece8=true; 
+					}  
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+						thereisapiece8=true;  
+						checkpiece8=true; 
+					}  
+					else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+						thereisapiece8=true; 
+					}
+				}
+				else { // same color piece as king. 
+					thereisapiece8=true; 
+				}
+			} 		
+			if (thereisapiece8==false) { 	
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+					checkpiece8=true; 
+				}   
+				else { 
+					notchecknopiece=true; 
+				}
+			}
+		} 
+		else if (kingcol==0) { // king is located at the leftmost column 
+			checkrow=kingrow-1; // king is located one above original king 
+			checkcol=kingcol;  
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						}  
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece1=true; 
+						}
+					} 
+				}
+				if (thereisapiece1==false) { 
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+						checkpiece1=true; 
+					} 
+					else { 
+						notchecknopiece=true;
+					}
+				}
+				checkrow=kingrow+1;  // king is located one below original king  
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece2=true;  
+							checkpiece2=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+							thereisapiece2=true;  
+							checkpiece2=true; 
+						}  
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece2=true; 
+						}
+					} 
+				} 
+				if (thereisapiece2==false) { 
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+						checkpiece2=true; 
+					} 
+					else { 
+						notchecknopiece=true;
+					}
+				}
+				checkrow=kingrow; // king is located right adjacent to the original king 
+				checkcol=kingcol+1; 
+			if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+						thereisapiece3=true;  
+						checkpiece3=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+						thereisapiece3=true;  
+						checkpiece3=true; 
+					}  
+					else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+						thereisapiece3=true; 
+					}
+				} 
+			} 
+			if (thereisapiece3==false) { 
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+					checkpiece3=true; 
+				} 
+				else { 
+					notchecknopiece=true;
+				}
+			}
+		
+			checkrow=kingrow-1; // king is located to the top right diagonal from original king 
+			checkcol=kingcol+1; 
+			if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+						thereisapiece4=true;  
+						checkpiece4=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+						thereisapiece4=true;  
+						checkpiece4=true; 
+					}  
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+						thereisapiece4=true;  
+						checkpiece4=true; 
+					}  
+					else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+						thereisapiece4=true; 
+					}
+				} 
+			}
+				if (thereisapiece4==false) { 
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+						checkpiece4=true; 
+					} 
+					else { 
+						notchecknopiece=true;
+					}
+				} 
+				
+			checkrow=kingrow+1; // king is located to the right bottom diagonal from original king 
+			checkcol=kingcol+1;  
+			if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+						thereisapiece5=true;  
+						checkpiece5=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+						thereisapiece5=true;  
+						checkpiece5=true; 
+					} 
+					else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+								thereisapiece5=true; 
+					}
+				} 
+			}		
+				if (thereisapiece5==false) { 
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+						checkpiece5=true; 
+					} 
+					else { 
+						notchecknopiece=true;
+					}
+				}
+			}   
+	
+		else { // king is located at the rightmost column 
+			checkrow=kingrow-1; // king is located right above original king 
+			checkcol=kingcol;  
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						}  
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece1=true; 
+						}
+					} 
+				}
+				if (thereisapiece1==false) { 
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+						checkpiece1=true; 
+					} 
+					else { 
+						notchecknopiece=true;
+					}
+				}
+			checkrow=kingrow+1;  // king is located one below original king 
+			if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+						thereisapiece2=true;  
+						checkpiece2=true; 
+					} 
+					else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+						thereisapiece2=true;  
+						checkpiece2=true; 
+					}  
+					else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+						thereisapiece2=true; 
+					}
+				} 
+			}
+		
+			if (thereisapiece2==false) { 
+		
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+					checkpiece2=true; 
+				} 
+				else { 
+					notchecknopiece=true; 
+				}
+			} 
+			checkrow=kingrow; 
+			checkcol=kingcol-1; 
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece3=true;  
+							checkpiece3=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+							thereisapiece3=true;  
+							checkpiece3=true; 
+						}  
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece3=true; 
+						}
+					} 
+				}
+				if (thereisapiece3==false) { 
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+						checkpiece3=true; 
+					} 
+					else { 
+						notchecknopiece=true; 
+					}
+				} 
+				checkrow=kingrow-1; // king is located to the top left diagonal of original king  
+				checkcol=kingcol-1;  
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+			
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+	
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece4=true;  
+							checkpiece4=true; 
+						} 
+			
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+							thereisapiece4=true;  
+							checkpiece4=true; 
+						}  
+			
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece4=true; 
+						}
+					} 
+				}
+	
+				if (thereisapiece4==false) { 
+	
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { 
+						checkpiece4=true; 
+					} 
+					else { 
+						notchecknopiece=true; 
+					}
+				} 
+				checkrow=kingrow+1; 
+				checkcol=kingcol-1; // king is located to the bottom left diagonal of original king 
+				
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+			
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece5=true;  
+							checkpiece5=true; 
+						} 	
+		
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+							thereisapiece5=true;  
+							checkpiece5=true; 
+						}  
+				
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("B")) { 
+							thereisapiece5=true;  
+							checkpiece5=true; 
+						}  
+				
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece5=true; 
+						}
+					} 
+				}
+
+				if (thereisapiece5==false) { 
+
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+						checkpiece5=true; 
+					} 
+					else { 
+						notchecknopiece=true; 
+					}
+				} 
+			}
+		} 
+	else { // king is located on the top row of the board  
+		if (kingcol>0 && kingcol<7) { 
+			checkrow=kingrow;  // king is located adjacent to the left of 
+			checkcol=kingcol-1; 
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 		
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						}  
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece1=true; 
+						}
+					} 
+				}
+					if (thereisapiece1==false) { 
+						if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+							checkpiece1=true; 
+						} 
+						else { 
+							notchecknopiece=true; 
+						}
+					} 
+				checkcol=kingcol+1;   // king is located right next to original king 
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece2=true;  
+							checkpiece2=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+							thereisapiece2=true;  
+							checkpiece2=true; 
+						}  
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece2=true; 
+						}
+					} 
+				}
+				if (thereisapiece2==false) { 
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+						checkpiece2=true; 
+					} 
+					else { 
+						notchecknopiece=true; 
+					}
+				} 	
+				checkrow=kingrow+1; // king is located to the left diagonal of original king  
+				checkcol=kingcol-1;  
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece3=true;  
+							checkpiece3=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+							thereisapiece3=true;  
+							checkpiece3=true; 
+						}  
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("B")) { 
+							thereisapiece3=true;  
+							checkpiece3=true; 
+						}  
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece3=true; 
+						}
+					} 
+				}
+				if (thereisapiece3==false) { 
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+						checkpiece3=true; 
+					} 
+					else { 
+						notchecknopiece=true; 
+					}
+				} 
+				checkcol=kingcol+1;  // king is located to the right diagonal of original king 
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece4=true;  
+							checkpiece4=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+							thereisapiece4=true;  
+							checkpiece4=true; 
+						}  
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("B")) { 
+							thereisapiece4=true;  
+							checkpiece4=true; 
+						}  
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece4=true; 
+						}
+					} 
+				}
+				if (thereisapiece4==false) { 
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+						checkpiece4=true; 
+					} 
+					else { 
+						notchecknopiece=true; 
+					}
+				} 
+				checkcol=kingcol; 
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece5=true;  
+							checkpiece5=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+							thereisapiece5=true;  
+							checkpiece5=true; 
+						}  
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece5=true; 
+						}
+					} 
+				}
+				if (thereisapiece5==false) { 
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+					checkpiece5=true; 
+					} 
+					else { 
+						notchecknopiece=true; 
+					}
+				} 
+			} 
+			else if (kingcol==0) {  // king is located on the leftmost corner in the first row  
+				checkrow=kingrow; // king is located right next to original king  
+				checkcol=kingcol+1;  
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						}  
+						
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece1=true; 
+						}
+					} 
+				}	
+					if (thereisapiece1==false) { 
+						if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+							checkpiece1=true; 
+						} 
+						else { 
+							notchecknopiece=true; 
+						}
+					} 
+				checkrow=kingrow+1; // king is located right below original king 
+				checkcol=kingcol;  
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece2=true;  
+							checkpiece2=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("P")) { 
+							thereisapiece2=true;  
+							checkpiece2=true; 
+						}  
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece2=true; 
+						}
+					} 
+				}
+
+				if (thereisapiece2==false) { 
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+						checkpiece2=true; 
+					} 
+					else { 
+						notchecknopiece=true; 
+					}
+				} 
+				checkrow=kingrow+1;// king is located diagonally from the original king  
+				checkcol=kingcol+1; 
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece3=true;  
+							checkpiece3=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("B")) { 
+							thereisapiece3=true;  
+							checkpiece3=true; 
+						}  
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece3=true; 
+						}
+					} 
+				}
+				if (thereisapiece3==false) { 
+					if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+						checkpiece3=true; 
+					} 
+					else { 
+						notchecknopiece=true; 
+					}
+				} 
+			} 
+			else { // king is located at the rightmost on the top row
+				checkrow=kingrow; // king is located to the left of original king 
+				checkcol=kingcol-1;  
+				if (chessboard[checkrow][checkcol].getPiece()!=null) { 
+					if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+						if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						} 
+						else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+							thereisapiece1=true;  
+							checkpiece1=true; 
+						}  
+						
+						else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+							thereisapiece1=true; 
+						}
+					} 
+				}
+					if (thereisapiece1==false) { 
+						if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+							checkpiece1=true; 
+						} 
+						else { 
+							notchecknopiece=true; 
+						}
+					} 
+			checkrow=kingrow+1; // king is located one below of original king 
+			checkcol=kingcol;   
+			if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+					thereisapiece2=true;  
+					checkpiece2=true; 
+				} 
+				else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+					thereisapiece2=true;  
+					checkpiece2=true; 
+				}  
+				else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+					thereisapiece2=true; 
+				}
+			} 
+		}
+			if (thereisapiece2==false) { 
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+					checkpiece2=true; 
+				} 
+				else { 
+					notchecknopiece=true; 
+				}
+			} 
+			checkrow=kingrow+1; // king is located diagonally from original king 
+			checkcol=kingcol-1;  
+			if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("W")) { 
+				if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("Q")) { 
+					thereisapiece3=true;  
+					checkpiece3=true; 
+				} 
+				else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("R")) { 
+					thereisapiece3=true;  
+					checkpiece3=true; 
+				} 
+				else if (chessboard[checkrow][checkcol].getPiece().getColor().equalsIgnoreCase("B")) { 
+					thereisapiece3=true;  
+					checkpiece3=true; 
+				}  
+				else { // all other white pieces-cant check, just move original king to the other spots to see if there are other spots 
+					thereisapiece3=true; 
+				}
+			} 
+		}
+			if (thereisapiece3==false) { 
+				if (check(white,black,checkcheckmate,checkrow,checkcol)) { // king is located to the bottom right diagonal of original king  
+					checkpiece3=true; 
+				} 
+				else { 
+					notchecknopiece=true; 
+				}
+			} 			
+		}  
+	
+	public static void enpassant (boolean whitepawn, boolean blackpawn, int oldposrow, int oldposcol, int newposrow, int newposcol) { 
+		
+		if (whitepawn) { // white move 
+			
+			if (oldposrow==6) { 
+				if (newposrow==oldposrow-2) { // white pawn did move two spaces to start the game, check the adjacent sides to see if they have the opposing pawns  
+					
+					
+				}
+			}
+		}
+	}
 }
+	
+
 
 
 
